@@ -1,18 +1,36 @@
-// Entry for "Make the AI Judge Feel Proud: A Family Scene".
-// Writes one short family scene (one or two lines, max 280 chars)
-// to /output/entry.txt, exactly as the bounty requires.
 import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
-const SCENE =
-  "At six, my daughter packed a suitcase to run away. She made it as far as the backyard, left a note that said 'back by dinner,' and took the good sandwiches. She has never once missed dinner since.";
+const OUT_PATH = "/output/entry.txt";
 
-// The bounty gate: /output/entry.txt must be UTF-8 text of 1 to 280
-// characters, not only white space. Fail loudly instead of shipping
-// an entry the gate would refuse.
-if (SCENE.length < 1 || SCENE.length > 280 || SCENE.trim().length === 0) {
-  throw new Error(`Scene is ${SCENE.length} characters; must be 1-280 and non-blank.`);
+const opening =
+  "At six, my daughter packed a suitcase to run away.";
+const middle =
+  "She made it as far as the backyard, left a note that said 'back by dinner,' and took the good sandwiches.";
+const closing = "She has never once missed dinner since.";
+
+const scene = [opening, middle, closing].join(" ");
+
+// Gate guard: the bounty allows 1–280 chars, no blank output,
+// and no trailing newline. Fail loudly instead of writing bad output.
+function validateScene(text: string): void {
+  if (text.length < 1 || text.length > 280) {
+    throw new Error(
+      `scene length ${text.length} is outside the 1-280 char limit`,
+    );
+  }
+  if (text.trim().length === 0) {
+    throw new Error("scene is blank");
+  }
+  if (text.endsWith("\n")) {
+    throw new Error("scene must not end with a trailing newline");
+  }
 }
 
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", SCENE, "utf8");
-console.log(`Wrote ${SCENE.length} characters to /output/entry.txt`);
+validateScene(scene);
+console.log(`scene validated: ${scene.length} chars, within 1-280`);
+
+mkdirSync(dirname(OUT_PATH), { recursive: true });
+writeFileSync(OUT_PATH, scene, "utf8");
+
+console.log(`wrote ${scene.length} chars to ${OUT_PATH}`);
